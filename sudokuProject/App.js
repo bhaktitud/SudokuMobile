@@ -1,19 +1,33 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { StyleSheet, Text, View, Button, TextInput, FlatList } from 'react-native';
+import axios from 'axios'
 
 export default function App() {
 
-  const data = [
-    [1,2,3,4,5,6,7,8,9],
-    [0,0,0,0,0,0,0,0,0],
-    [0,0,0,0,0,0,0,0,0],
-    [0,0,0,0,0,0,0,0,0],
-    [0,0,0,0,0,0,0,0,0],
-    [0,0,0,0,0,0,0,0,0],
-    [0,0,0,0,0,0,0,0,0],
-    [0,0,0,0,0,0,0,0,0],
-    [0,0,0,0,0,0,0,0,9],
-  ]
+  const [data, setData] = useState([])
+
+  // const data = [
+  //   [1,2,3,4,5,6,7,8,9],
+  //   [2,1,1,1,1,1,1,1,1],
+  //   [1,1,1,1,1,1,1,1,1],
+  //   [1,1,1,1,1,1,1,1,1],
+  //   [1,1,1,1,1,1,1,1,1],
+  //   [1,1,1,1,1,1,1,1,1],
+  //   [1,1,1,1,1,1,1,1,1],
+  //   [1,1,1,1,1,1,1,1,1],
+  //   [1,1,1,1,1,1,1,6,9],
+  // ]
+
+  useEffect(() => {
+    axios
+      .get(`https://sugoku.herokuapp.com/board`)
+      .then(({ data }) => {
+        const { board } = data
+        setData(board)
+      }).catch((err) => {
+        console.log(err)
+      });
+  }, [])
 
 
   return (
@@ -27,7 +41,7 @@ export default function App() {
           <Cell style={styles.viewStyle} item={item} />
         )}
         numColumns={3}
-        keyExtractor={(data, index) => index.toString()}
+        listKey={(item, index) => index.toString()}
       />
       </View>
       <Button title="Submit" />
@@ -35,24 +49,9 @@ export default function App() {
   );
 }
 
-// function Cell({col, index, indexCol} ){
-//   console.log(col, index, indexCol, index.toString()+indexCol)
-//   const [ defaultVals, onChangeText ] = useState(col.toString())
-
-//   // return null
-//   return (
-//     <TextInput
-//     style={{ height: 40, width: 40, borderColor: 'black', borderWidth: 1 }}
-//     onChangeText={text => onChangeText(text)}
-//     keyboardType={'numeric'}
-//     // key={(index.toString()+indexCol)}
-//     value={defaultVals}
-//     />
-//   )
-// }
-
 function Cell({ item }) {
   console.log(item)
+    // const [ defaultVals, onChangeText ] = useState(item.toString())
 
   return (
     <View style={styles.viewStyle} >
@@ -61,13 +60,13 @@ function Cell({ item }) {
         renderItem = {({ item }) => (
           <TextInput 
           style={styles.inputStyle}
-          onChangeText={text => onChangeText(text)}
           keyboardType={'numeric'}
-          value={item.toString()}
+          maxLength={1}
+          defaultValue={item.toString()}
           />
         )}
         numColumns={3}
-        keyExtractor={(item, index) => index.toString()}
+        listKey={(item, index) => index.toString()}
       />
     </View>
   )
