@@ -82,22 +82,30 @@ const styles = StyleSheet.create({
   },
   boardContainer: {
     backgroundColor: 'red',
-    width: "90%",
-    margin: 2,
-    height: "80%",
+    width: "100%",
+    margin: 10,
+    height: "50%",
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "center"
   },
   viewStyle: {
-    width: 110,
-    height: 110,
-    marginTop: 10,
-    marginLeft: 10,
-    backgroundColor: 'blue'
+    width: 130,
+    height: 130,
+    marginTop: 5,
+    marginLeft: 5,
+    backgroundColor: 'blue',
+    alignItems:"center"
   },
   inputStyle: {
-    width: 30,
-    height: 30,
+    textAlign: "center",
+    fontWeight: "bold",
+    fontSize: 25,
+    width: 35,
+    height: 35,
     backgroundColor: 'grey',
-    marginTop: 5,
-    marginLeft: 5
+    marginTop: 6,
+    marginLeft: 2.5,
+    marginRight:2.5
   }
 });
