@@ -6,21 +6,23 @@ import {
   Button, 
   TextInput, 
   FlatList } from 'react-native';
-import axios from 'axios';
 import { Provider } from 'react-redux';
 import store from './src/store';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchBoard } from './src/store/actions';
+import { 
+    fetchBoard,
+    setUserResult, 
+    validateResult,
+    showResult
+  } from './src/store/actions';
 
 export default function App() {
-
 
   return (
     <Provider store={store}>
       <View style={styles.container}>
         <Text style={styles.textTitle}>SUDOKU - GOKILL</Text>
         <Board />
-        <Button title="Submit"/>
       </View>
     </Provider>
   );
@@ -35,24 +37,45 @@ function Board () {
   const [ solveData, setSolveData ] = useState([])
 
   const board = useSelector(state => state.board)
+  const userResult = useSelector(state => state.userResult)
 
   useEffect(() => {
     dispatch(fetchBoard(level))
   }, [])
 
+  const handleOnValidate = () => {
+    // console.log('masuk sini', userResult)
+    dispatch(validateResult(userResult))
+  }
+
+  const handleOnShowFinal = () => {
+    console.log('show me the way')
+    dispatch(showResult(userResult))
+  }
+
   return (
-    <View style={styles.boardContainer}>
-    <FlatList 
-      style={styles.cellList}
-      data={board}
-      renderItem={({ item, index }) => (
-        <Cell style={styles.viewStyle} item={item} index={index} board={board}/>
-      )}
-      numColumns={3}
-      listKey={(item, index) => index.toString()}
-      keyExtractor={(item, index) => index.toString()}
-    />
-    </View>
+    <>
+      <View style={styles.boardContainer}>
+      <FlatList 
+        style={styles.cellList}
+        data={board}
+        renderItem={({ item, index }) => (
+          <Cell style={styles.viewStyle} item={item} index={index} board={board}/>
+        )}
+        numColumns={3}
+        listKey={(item, index) => index.toString()}
+        keyExtractor={(item, index) => index.toString()}
+      />
+      </View>
+      <View style={styles.buttonGameContainer}>
+        <Button style={styles.buttonOnGame} title="Validate" 
+            onPress={handleOnValidate}
+        />
+        <Button style={styles.buttonOnGame} title="Show me the way!"
+          onPress={handleOnShowFinal}
+        />
+      </View>
+    </>
   )
 }
 
@@ -60,6 +83,7 @@ function Cell({ item, index, board }) {
   const rowIndex = index
   const [ defaultBoard, setDefault ] = useState(board)
 
+  const dispatch = useDispatch()
   
   const onChangeValue = (text, indexCol, row) => {
     console.log(text)
@@ -68,6 +92,7 @@ function Cell({ item, index, board }) {
         cells.splice(indexCol, 1, parseInt(text))
       }
     })
+    dispatch(setUserResult(defaultBoard))
   }
 
   return (
@@ -135,5 +160,11 @@ const styles = StyleSheet.create({
   },
   textTitle:{
     fontSize: 30
+  },
+  buttonGameContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    width: "60%"
   }
 });

@@ -1,8 +1,15 @@
-import { SET_BOARD } from '../actions'
+import { 
+    SET_BOARD, 
+    SET_USER_RESULT,
+    SET_VALIDATE_STATUS
+} from '../actions'
 
 
 const initialState = {
-    board : []
+    board : [],
+    userResult: [],
+    status: 'unsolved'
+
 }
 
 export const reducers = (state = initialState, action) => {
@@ -12,6 +19,16 @@ export const reducers = (state = initialState, action) => {
             return {
                 ...state,
                 board: payload
+            }
+        case SET_USER_RESULT:
+            return {
+                ...state,
+                userResult: payload
+            }
+        case SET_VALIDATE_STATUS:
+            return {
+                ...state,
+                status: payload
             }
         default:
             return state;
