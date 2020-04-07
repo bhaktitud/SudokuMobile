@@ -2,7 +2,8 @@ import axios from 'axios'
 
 export const SET_BOARD = 'SET_BOARD';
 export const SET_USER_RESULT = 'SET_USER_RESULT';
-export const SET_VALIDATE_STATUS = 'SET_VALIDATE_STATUS'
+export const SET_VALIDATE_STATUS = 'SET_VALIDATE_STATUS';
+export const SET_PLAYER_NAME = 'SET_PLAYER_NAME';
 
 
 export const fetchBoard = (level) => {
@@ -12,6 +13,7 @@ export const fetchBoard = (level) => {
             .then(({ data }) => {
                 const { board } = data
                 dispatch(setBoard(board))
+                dispatch(setUserResult(board))
             }).catch((err) => {
                 console.log(err)
             });
@@ -37,6 +39,7 @@ export const validateResult = (board) => {
         axios
             .post(`https://sugoku.herokuapp.com/validate`, board)
             .then(({ data }) => {
+                console.log(data, 'validation')
                 const { status } = data
                 dispatch(setValidateStatus(status))
             }).catch((err) => {
@@ -64,5 +67,12 @@ export const showResult = (board) => {
             }).catch((err) => {
                 console.log(err)
             });
+    }
+}
+
+export const setPlayername = (playerName) => {
+    return {
+        type: SET_PLAYER_NAME,
+        payload: playerName
     }
 }

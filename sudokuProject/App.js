@@ -5,7 +5,9 @@ import {
   View, 
   Button, 
   TextInput, 
-  FlatList } from 'react-native';
+  FlatList, 
+  Image,
+  Alert} from 'react-native';
 import { Provider } from 'react-redux';
 import store from './src/store';
 import { useDispatch, useSelector } from 'react-redux';
@@ -13,59 +15,203 @@ import {
     fetchBoard,
     setUserResult, 
     validateResult,
-    showResult
+    showResult,
+    setValidateStatus,
+    setPlayername
   } from './src/store/actions';
 
-export default function App() {
+import { NavigationContainer } from '@react-navigation/native';
+import { createStackNavigator } from '@react-navigation/stack';
+
+import moment from 'moment'
+
+
+const Stack = createStackNavigator();
+
+function App() {
 
   return (
     <Provider store={store}>
-      <View style={styles.container}>
-        <Text style={styles.textTitle}>SUDOKU - GOKILL</Text>
-        <Board />
-      </View>
+        <NavigationContainer>
+          <Stack.Navigator>
+            <Stack.Screen name="Home" component={HomeScreen} options={{ headerShown: false }}/>
+            <Stack.Screen name="SUDOKU" component={Board}/>
+            <Stack.Screen name="Finish" component={FinishScreen} options={{ headerShown: false }}/>
+            <Stack.Screen name="Win" component={WinScreen} options={{ headerShown: false }}/>
+          </Stack.Navigator>
+        </NavigationContainer>
     </Provider>
   );
 }
 
-function Board () {
+function HomeScreen ({ navigation }) {
+
+  const [ placeholder, setPlaceholder ] = useState('Type Your Name')
+  const dispatch = useDispatch()
+
+  const onChangeName = (text) => {
+    console.log(text)
+    setPlaceholder(text)
+    dispatch(setPlayername(placeholder))
+  }
+
+  return(
+    <View style={styles.container}>
+      <View style={styles.homeScreen}>
+        <Image
+        style={styles.image1} 
+        source={require('./assets/image1.png')}
+        />
+        <Text style={styles.textTitle}>SUDOKU - GOKILL</Text>
+        <Text style={styles.captTitle}>"Let your brain drain..."</Text>
+        <TextInput style={styles.inputName}
+          defaultValue={placeholder}
+          onChangeText={(text) => onChangeName(text)}
+        />
+        <Button title="START GAME" 
+          onPress={() => navigation.push('SUDOKU')}
+        />
+      </View>
+    </View>
+  )
+}
+
+function FinishScreen ({ navigation }) {
+  return(
+    <View style={styles.container}>
+      <View style={styles.homeScreen}>
+        <Text style={styles.textTitle}>Congratulations!</Text>
+        <Text style={styles.captTitle}>"It is NOT for you, we congratulate the BOT! :P"</Text>
+        <Button style={styles.playAgain} title="PLAY AGAIN" 
+          onPress={() => navigation.push('SUDOKU')}
+        />
+      </View>
+    </View>
+  )
+}
+
+function WinScreen ({ navigation }) {
+  return(
+    <View style={styles.container}>
+      <View style={styles.homeScreen}>
+        <Text style={styles.textTitle}>Congratulations!</Text>
+        <Text style={styles.captTitle}>"You are the real genius!"</Text>
+        <Button style={styles.playAgain} title="PLAY AGAIN" 
+          onPress={() => navigation.push('Game')}
+        />
+      </View>
+    </View>
+  )
+}
+
+function Board ({ navigation }) {
+
+  const [ initTimer, setInitTimer ] = useState({
+    eventDate:moment.duration().add({hours:0,minutes:0,seconds:0}),
+    hours:0,
+    mins:0,
+    secs:0
+  })
+
+  console.log(initTimer)
+
+
+  const updateTimer = () => {
+    
+    const x = setInterval(() => {
+      let { eventDate } = initTimer
+
+      if(eventDate <=0){
+        clearInterval(x)
+      }else {
+        eventDate = eventDate.add(1, 'second')
+        const hours = eventDate.hours()
+        const mins = eventDate.minutes()
+        const secs = eventDate.seconds()
+        
+        setInitTimer({
+          hours,
+          mins,
+          secs,
+          eventDate
+        })
+      }
+    },1000)
+
+  }
 
   const dispatch = useDispatch()
 
   const [ level, setLevel ] = useState('random')
-  const [ childData, setChildData ] = useState([])
   const [ solveData, setSolveData ] = useState([])
+
 
   const board = useSelector(state => state.board)
   const userResult = useSelector(state => state.userResult)
+  const gameStatus = useSelector(state => state.status)
+  const playerName = useSelector(state => state.playerName)
 
   useEffect(() => {
     dispatch(fetchBoard(level))
+    dispatch(setValidateStatus('unsolved'))
+    updateTimer()
   }, [])
 
   const handleOnValidate = () => {
-    // console.log('masuk sini', userResult)
     dispatch(validateResult(userResult))
+    if(gameStatus == 'solved'){
+      navigation.push('Win')
+    } else {
+      Alert.alert(
+        "Game Notice",
+        `Game status : ${gameStatus}, therefore we cannot validate your result. Finish it!`,
+        [
+          { text: "OK", onPress: () => console.log("OK Pressed") }
+        ]
+      );
+    }
   }
 
   const handleOnShowFinal = () => {
-    console.log('show me the way')
-    dispatch(showResult(userResult))
+    Alert.alert(
+      "Confirmation",
+      "Do really want to give up?",
+      [
+        {
+          text: "Cancel",
+          onPress: () => console.log("Cancel Pressed"),
+          style: "cancel"
+        },
+        {
+          text: "Yes Please", onPress: () => {
+            dispatch(showResult(userResult))
+            navigation.push('Finish')
+          }
+        }
+      ]
+    );
   }
 
+  console.log(board, 'initial')
+  console.log(userResult, 'user')
+
   return (
-    <>
+    <View style={styles.containerGame}>
+    <Text style={styles.playerName}>{`${initTimer.hours} : ${initTimer.mins} : ${initTimer.secs}`}</Text>
+      <View style={styles.topBoardBar}>
+        <Text style={styles.playerName}>Player Name : {playerName}</Text>
+      </View>
       <View style={styles.boardContainer}>
-      <FlatList 
-        style={styles.cellList}
-        data={board}
-        renderItem={({ item, index }) => (
-          <Cell style={styles.viewStyle} item={item} index={index} board={board}/>
-        )}
-        numColumns={3}
-        listKey={(item, index) => index.toString()}
-        keyExtractor={(item, index) => index.toString()}
-      />
+        <FlatList 
+          style={styles.cellList}
+          data={board}
+          renderItem={({ item, index }) => (
+            <Cell style={styles.viewStyle} item={item} index={index} board={board}/>
+          )}
+          numColumns={3}
+          listKey={(item, index) => index.toString()}
+          keyExtractor={(item, index) => index.toString()}
+        />
       </View>
       <View style={styles.buttonGameContainer}>
         <Button style={styles.buttonOnGame} title="Validate" 
@@ -75,7 +221,10 @@ function Board () {
           onPress={handleOnShowFinal}
         />
       </View>
-    </>
+      <View style={styles.statusBar}>
+        <Text style={styles.botBoardBar}>Game Status : {gameStatus} | Difficulty : {level}</Text>
+      </View>
+    </View>
   )
 }
 
@@ -86,7 +235,7 @@ function Cell({ item, index, board }) {
   const dispatch = useDispatch()
   
   const onChangeValue = (text, indexCol, row) => {
-    console.log(text)
+
     defaultBoard.map((cells, index) => {
       if (index == row){
         cells.splice(indexCol, 1, parseInt(text))
@@ -126,11 +275,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  containerGame:{
+    backgroundColor: '#fff',
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: "100%"
+  },
   boardContainer: {
-    backgroundColor: 'black',
+    backgroundColor: 'brown',
     width: "100%",
-    margin: 10,
-    height: "50%",
+    margin: 5,
+    height: "56%",
     flexDirection: "column",
     alignItems: "center",
     justifyContent: "center"
@@ -166,5 +321,47 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     width: "60%"
-  }
+  },
+  statusBar: {
+    marginTop: 10,
+    backgroundColor: '#0abbff',
+    width: '100%'
+  },
+  captTitle:{
+    fontStyle: "italic",
+  },
+  image1: {
+    width: 120,
+    height: 100
+  },
+  homeScreen: {
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "space-evenly"
+  },
+  inputName: {
+    borderBottomWidth: 1,
+    borderBottomColor: "black",
+    width: 200,
+    height: 50,
+    marginTop: 15,
+    marginBottom: 5,
+    fontSize: 20,
+    textAlign: "center"
+  },
+  playerName: {
+    fontSize: 20,
+    textTransform: "uppercase",
+    fontWeight: 'bold'
+  },
+  topBoardBar: {
+    width: '100%',
+  },
+  botBoardBar: {
+    textTransform: "uppercase",
+    fontWeight: 'bold',
+    textAlign: 'center'
+  },
 });
+
+export default App;
