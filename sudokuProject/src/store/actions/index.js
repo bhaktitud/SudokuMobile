@@ -5,6 +5,7 @@ export const SET_USER_RESULT = 'SET_USER_RESULT';
 export const SET_VALIDATE_STATUS = 'SET_VALIDATE_STATUS';
 export const SET_PLAYER_NAME = 'SET_PLAYER_NAME';
 export const SET_GAME_LEVEL = 'SET_GAME_LEVEL';
+export const SET_LOADING = 'SET_LOADING';
 
 
 export const fetchBoard = (level) => {
@@ -15,9 +16,10 @@ export const fetchBoard = (level) => {
                 const { board } = data
                 dispatch(setBoard(board))
                 dispatch(setUserResult(board))
+                dispatch(setLoading(false))
             }).catch((err) => {
                 console.log(err)
-            });
+            })
     }
 }
 
@@ -57,9 +59,6 @@ export const setValidateStatus = (status) => {
 }
 
 export const showResult = (board) => {
-    console.log({board})
-
-
     const encodeBoard = (board) => board.reduce((result, row, i) => result + `%5B${encodeURIComponent(row)}%5D${i === board.length -1 ? '' : '%2C'}`, '')
 
     const encodeParams = (params) => 
@@ -89,9 +88,15 @@ export const setPlayername = (playerName) => {
 }
 
 export const setGameLevel = (level) => {
-    console.log(level, 'action')
     return {
         type: SET_GAME_LEVEL,
         payload: level
+    }
+}
+
+export const setLoading = (status) => {
+    return {
+        type: SET_LOADING,
+        payload: status
     }
 }

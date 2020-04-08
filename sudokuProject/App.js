@@ -8,7 +8,8 @@ import {
   FlatList, 
   Image,
   Alert,
-  Picker
+  Picker,
+  ActivityIndicator
 } from 'react-native';
 import { Provider } from 'react-redux';
 import store from './src/store';
@@ -20,7 +21,8 @@ import {
     showResult,
     setValidateStatus,
     setPlayername,
-    setGameLevel
+    setGameLevel,
+    setLoading
   } from './src/store/actions';
 
 import { NavigationContainer } from '@react-navigation/native';
@@ -49,16 +51,10 @@ function App() {
 
 function HomeScreen ({ navigation }) {
 
-  const [ placeholder, setPlaceholder ] = useState('Type Your Name')
-  const [selectedValue, setSelectedValue] = useState("");
+  const [ placeholder, onChangeText ] = useState('Player')
+  const [selectedValue, setSelectedValue] = useState('random');
 
   const dispatch = useDispatch()
-
-  const onChangeName = (text) => {
-    console.log(text)
-    setPlaceholder(text)
-    dispatch(setPlayername(placeholder))
-  }
 
   const onSelectedLevel = (itemValue, itemIndex) => {
     console.log(itemValue)
@@ -66,7 +62,9 @@ function HomeScreen ({ navigation }) {
   }
 
   const navToBoard = () => {
+    dispatch(setPlayername(placeholder))
     dispatch(setGameLevel(selectedValue))
+    dispatch(setLoading(true))
     navigation.push('SUDOKU')
   }
 
@@ -79,12 +77,14 @@ function HomeScreen ({ navigation }) {
         />
         <Text style={styles.textTitle}>SUDOKU - GOKILL</Text>
         <Text style={styles.captTitle}>"Let your brain drain..."</Text>
-        <TextInput style={styles.inputName}
-          defaultValue={placeholder}
-          onChangeText={(text) => onChangeName(text)}
+        <TextInput 
+          placeholder={'Your Name'}
+          style={styles.inputName}
+          onChangeText={(text) => onChangeText(text)}
         />
         <Text>Difficulty</Text>
         <Picker
+        mode={"dialog"}
         selectedValue={selectedValue}
         style={{ height: 50, width: 150 }}
         onValueChange={(itemValue, itemIndex) => onSelectedLevel(itemValue, itemIndex)}
@@ -133,14 +133,11 @@ function WinScreen ({ navigation }) {
 function Board ({ navigation }) {
 
   const [ initTimer, setInitTimer ] = useState({
-    eventDate:moment.duration().add({hours:0,minutes:0,seconds:0}),
+    eventDate:moment.duration().add({hours:0,minutes:0,seconds:1}),
     hours:0,
     mins:0,
     secs:0
   })
-
-  console.log(initTimer)
-
 
   const updateTimer = () => {
     
@@ -173,8 +170,7 @@ function Board ({ navigation }) {
   const gameStatus = useSelector(state => state.status)
   const playerName = useSelector(state => state.playerName)
   const level = useSelector(state => state.level)
-  console.log(level)
-
+  const isLoading = useSelector(state => state.isLoading)
 
   useEffect(() => {
     dispatch(fetchBoard(level))
@@ -217,13 +213,15 @@ function Board ({ navigation }) {
   }
 
 
+
   return (
     <View style={styles.containerGame}>
-    <Text style={styles.playerName}>{`${initTimer.hours} : ${initTimer.mins} : ${initTimer.secs}`}</Text>
-      <View style={styles.topBoardBar}>
-        <Text style={styles.playerName}>Player Name : {playerName}</Text>
-      </View>
-      <View style={styles.boardContainer}>
+      <ActivityIndicator animating={isLoading} size="large" color="#0000ff" style={styles.loadingStyle} />
+      <Text style={styles.playerName}>{`${initTimer.hours} : ${initTimer.mins} : ${initTimer.secs}`}</Text>
+    <View style={styles.topBoardBar}>
+      <Text style={styles.playerName}>{playerName}</Text>
+    </View>
+    <View style={styles.boardContainer}>
         <FlatList 
           style={styles.cellList}
           data={board}
@@ -271,8 +269,9 @@ function Cell({ item, index, board }) {
       <FlatList 
         data = {item}
         renderItem = {({ item, index }) => (
-          <TextInput 
-          style={styles.inputStyle}
+          <TextInput
+          editable={item == 0 ? true: false} 
+          style={item == 0 ? styles.inputStyle: styles.clueStyle}
           keyboardType={'numeric'}
           maxLength={1}
           defaultValue={item.toString()}
@@ -331,6 +330,17 @@ const styles = StyleSheet.create({
     marginLeft: 2.5,
     marginRight:2.5
   },
+  clueStyle: {
+    textAlign: "center",
+    fontWeight: "bold",
+    fontSize: 25,
+    width: 35,
+    height: 35,
+    backgroundColor: 'green',
+    marginTop: 6,
+    marginLeft: 2.5,
+    marginRight:2.5
+  },
   lottie: {
     width: 100,
     height: 100
@@ -382,8 +392,9 @@ const styles = StyleSheet.create({
   botBoardBar: {
     textTransform: "uppercase",
     fontWeight: 'bold',
-    textAlign: 'center'
-  },
+    textAlign: 'center',
+    flexDirection: 'row'
+  }
 });
 
 export default App;

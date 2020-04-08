@@ -3,7 +3,8 @@ import {
     SET_USER_RESULT,
     SET_VALIDATE_STATUS,
     SET_PLAYER_NAME,
-    SET_GAME_LEVEL
+    SET_GAME_LEVEL,
+    SET_LOADING
 } from '../actions'
 
 
@@ -12,8 +13,8 @@ const initialState = {
     userResult: [],
     status: 'unsolved',
     playerName: 'player',
-    level: ''
-
+    level: '',
+    isLoading: false
 }
 
 export const reducers = (state = initialState, action) => {
@@ -43,6 +44,11 @@ export const reducers = (state = initialState, action) => {
             return {
                 ...state,
                 level: payload
+            }
+        case SET_LOADING:
+            return {
+                ...state,
+                isLoading: payload
             }
         default:
             return state;
