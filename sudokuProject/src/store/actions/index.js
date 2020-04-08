@@ -4,6 +4,7 @@ export const SET_BOARD = 'SET_BOARD';
 export const SET_USER_RESULT = 'SET_USER_RESULT';
 export const SET_VALIDATE_STATUS = 'SET_VALIDATE_STATUS';
 export const SET_PLAYER_NAME = 'SET_PLAYER_NAME';
+export const SET_GAME_LEVEL = 'SET_GAME_LEVEL';
 
 
 export const fetchBoard = (level) => {
@@ -56,9 +57,19 @@ export const setValidateStatus = (status) => {
 }
 
 export const showResult = (board) => {
+    console.log({board})
+
+
+    const encodeBoard = (board) => board.reduce((result, row, i) => result + `%5B${encodeURIComponent(row)}%5D${i === board.length -1 ? '' : '%2C'}`, '')
+
+    const encodeParams = (params) => 
+    Object.keys(params)
+    .map(key => key + '=' + `%5B${encodeBoard(params[key])}%5D`)
+    .join('&');
+
     return (dispatch) => {
         axios
-            .post(`https://sugoku.herokuapp.com/solve`, board)
+            .post(`https://sugoku.herokuapp.com/solve`, encodeParams({board}))
             .then(({ data }) => {
                 const { solution, status } = data
                 dispatch(setBoard(solution))
@@ -74,5 +85,13 @@ export const setPlayername = (playerName) => {
     return {
         type: SET_PLAYER_NAME,
         payload: playerName
+    }
+}
+
+export const setGameLevel = (level) => {
+    console.log(level, 'action')
+    return {
+        type: SET_GAME_LEVEL,
+        payload: level
     }
 }

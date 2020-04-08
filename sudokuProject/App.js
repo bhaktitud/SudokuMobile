@@ -7,7 +7,9 @@ import {
   TextInput, 
   FlatList, 
   Image,
-  Alert} from 'react-native';
+  Alert,
+  Picker
+} from 'react-native';
 import { Provider } from 'react-redux';
 import store from './src/store';
 import { useDispatch, useSelector } from 'react-redux';
@@ -17,7 +19,8 @@ import {
     validateResult,
     showResult,
     setValidateStatus,
-    setPlayername
+    setPlayername,
+    setGameLevel
   } from './src/store/actions';
 
 import { NavigationContainer } from '@react-navigation/native';
@@ -47,12 +50,24 @@ function App() {
 function HomeScreen ({ navigation }) {
 
   const [ placeholder, setPlaceholder ] = useState('Type Your Name')
+  const [selectedValue, setSelectedValue] = useState("");
+
   const dispatch = useDispatch()
 
   const onChangeName = (text) => {
     console.log(text)
     setPlaceholder(text)
     dispatch(setPlayername(placeholder))
+  }
+
+  const onSelectedLevel = (itemValue, itemIndex) => {
+    console.log(itemValue)
+    setSelectedValue(itemValue)
+  }
+
+  const navToBoard = () => {
+    dispatch(setGameLevel(selectedValue))
+    navigation.push('SUDOKU')
   }
 
   return(
@@ -68,8 +83,19 @@ function HomeScreen ({ navigation }) {
           defaultValue={placeholder}
           onChangeText={(text) => onChangeName(text)}
         />
+        <Text>Difficulty</Text>
+        <Picker
+        selectedValue={selectedValue}
+        style={{ height: 50, width: 150 }}
+        onValueChange={(itemValue, itemIndex) => onSelectedLevel(itemValue, itemIndex)}
+      >
+        <Picker.Item label="Random" value="random" />
+        <Picker.Item label="Easy" value="easy" />
+        <Picker.Item label="Medium" value="medium" />
+        <Picker.Item label="Hard" value="hard" />
+      </Picker>
         <Button title="START GAME" 
-          onPress={() => navigation.push('SUDOKU')}
+          onPress={() => navToBoard()}
         />
       </View>
     </View>
@@ -97,7 +123,7 @@ function WinScreen ({ navigation }) {
         <Text style={styles.textTitle}>Congratulations!</Text>
         <Text style={styles.captTitle}>"You are the real genius!"</Text>
         <Button style={styles.playAgain} title="PLAY AGAIN" 
-          onPress={() => navigation.push('Game')}
+          onPress={() => navigation.push('SUDOKU')}
         />
       </View>
     </View>
@@ -142,14 +168,13 @@ function Board ({ navigation }) {
 
   const dispatch = useDispatch()
 
-  const [ level, setLevel ] = useState('random')
-  const [ solveData, setSolveData ] = useState([])
-
-
   const board = useSelector(state => state.board)
   const userResult = useSelector(state => state.userResult)
   const gameStatus = useSelector(state => state.status)
   const playerName = useSelector(state => state.playerName)
+  const level = useSelector(state => state.level)
+  console.log(level)
+
 
   useEffect(() => {
     dispatch(fetchBoard(level))
@@ -184,16 +209,13 @@ function Board ({ navigation }) {
         },
         {
           text: "Yes Please", onPress: () => {
-            dispatch(showResult(userResult))
-            navigation.push('Finish')
+            dispatch(showResult(board))
           }
         }
       ]
     );
   }
 
-  console.log(board, 'initial')
-  console.log(userResult, 'user')
 
   return (
     <View style={styles.containerGame}>
