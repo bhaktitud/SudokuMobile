@@ -232,6 +232,9 @@ function Board ({ navigation }) {
             keyExtractor={(item, index) => index.toString()}
           />
       </View>
+      <View style={styles.statusBar}>
+          <Text style={styles.botBoardBar}>Game Status : {gameStatus} | Difficulty : {level}</Text>
+      </View>
       <View style={styles.buttonGameContainer}>
           <Button style={styles.buttonOnGame} title="Validate" 
               onPress={handleOnValidate}
@@ -239,9 +242,6 @@ function Board ({ navigation }) {
           <Button style={styles.buttonOnGame} title="Show me the way!"
             onPress={handleOnShowFinal}
           />
-      </View>
-      <View style={styles.statusBar}>
-          <Text style={styles.botBoardBar}>Game Status : {gameStatus} | Difficulty : {level}</Text>
       </View>
     </View>
   )
@@ -360,7 +360,7 @@ const styles = StyleSheet.create({
     width: "60%"
   },
   statusBar: {
-    marginTop: 10,
+    marginBottom: 10,
     backgroundColor: '#0abbff',
     width: '100%'
   },
