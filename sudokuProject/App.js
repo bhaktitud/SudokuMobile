@@ -9,7 +9,9 @@ import {
   Image,
   Alert,
   Picker,
-  ActivityIndicator
+  ActivityIndicator,
+  KeyboardAvoidingView,
+  KeyboardAvoidingViewComponent
 } from 'react-native';
 import { Provider } from 'react-redux';
 import store from './src/store';
@@ -210,36 +212,38 @@ function Board ({ navigation }) {
 
 
   return (
-    <View style={styles.containerGame}>
-      <ActivityIndicator animating={isLoading} size="large" color="#0000ff" style={styles.loadingStyle} />
-      <Text style={styles.timerStyle}>{`${initTimer.hours} : ${initTimer.mins} : ${initTimer.secs}`}</Text>
-    <View style={styles.topBoardBar}>
-      <Text style={styles.playerName}>{playerName}</Text>
-    </View>
-    <View style={styles.boardContainer}>
-        <FlatList 
-          style={styles.cellList}
-          data={board}
-          renderItem={({ item, index }) => (
-            <Cell style={styles.viewStyle} item={item} index={index} board={board}/>
-          )}
-          numColumns={3}
-          listKey={(item, index) => index.toString()}
-          keyExtractor={(item, index) => index.toString()}
-        />
+    <KeyboardAvoidingView style={styles.containerGame}>
+      <View style={styles.containerGame}>
+          <ActivityIndicator animating={isLoading} size="large" color="#0000ff" style={styles.loadingStyle} />
+          <Text style={styles.timerStyle}>{`${initTimer.hours} : ${initTimer.mins} : ${initTimer.secs}`}</Text>
+        <View style={styles.topBoardBar}>
+          <Text style={styles.playerName}>{playerName}</Text>
+        </View>
+        <View style={styles.boardContainer}>
+            <FlatList 
+              style={styles.cellList}
+              data={board}
+              renderItem={({ item, index }) => (
+                <Cell style={styles.viewStyle} item={item} index={index} board={board}/>
+              )}
+              numColumns={3}
+              listKey={(item, index) => index.toString()}
+              keyExtractor={(item, index) => index.toString()}
+            />
+        </View>
+        <View style={styles.buttonGameContainer}>
+            <Button style={styles.buttonOnGame} title="Validate" 
+                onPress={handleOnValidate}
+            />
+            <Button style={styles.buttonOnGame} title="Show me the way!"
+              onPress={handleOnShowFinal}
+            />
+        </View>
+        <View style={styles.statusBar}>
+            <Text style={styles.botBoardBar}>Game Status : {gameStatus} | Difficulty : {level}</Text>
+        </View>
       </View>
-      <View style={styles.buttonGameContainer}>
-        <Button style={styles.buttonOnGame} title="Validate" 
-            onPress={handleOnValidate}
-        />
-        <Button style={styles.buttonOnGame} title="Show me the way!"
-          onPress={handleOnShowFinal}
-        />
-      </View>
-      <View style={styles.statusBar}>
-        <Text style={styles.botBoardBar}>Game Status : {gameStatus} | Difficulty : {level}</Text>
-      </View>
-    </View>
+    </KeyboardAvoidingView>
   )
 }
 
@@ -260,26 +264,29 @@ function Cell({ item, index, board }) {
   }
 
   return (
-    <View style={styles.viewStyle} >
-      <FlatList 
-        data = {item}
-        renderItem = {({ item, index }) => (
-          <TextInput
-          // editable={item == 0 ? true: false} 
-          style={item == 0 ? styles.inputStyle: styles.clueStyle}
-          keyboardType={'numeric'}
-          maxLength={1}
-          defaultValue={item.toString()}
-          underlineColorAndroid="transparent"
-          onChangeText={text => onChangeValue(text, index, rowIndex)}
-          key={index.toString()+rowIndex}
+    <KeyboardAvoidingView>
+      <View style={styles.viewStyle} >
+        
+          <FlatList 
+            data = {item}
+            renderItem = {({ item, index }) => (
+              <TextInput
+              // editable={item == 0 ? true: false} 
+              style={item == 0 ? styles.inputStyle: styles.clueStyle}
+              keyboardType={'numeric'}
+              maxLength={1}
+              defaultValue={item.toString()}
+              underlineColorAndroid="transparent"
+              onChangeText={text => onChangeValue(text, index, rowIndex)}
+              key={index.toString()+rowIndex}
+              />
+            )}
+            numColumns={3}
+            listKey={(item, index) => index.toString()}
+            keyExtractor={(item, index) => index.toString()}
           />
-        )}
-        numColumns={3}
-        listKey={(item, index) => index.toString()}
-        keyExtractor={(item, index) => index.toString()}
-      />
-    </View>
+      </View>
+    </KeyboardAvoidingView>
   )
 }
 
@@ -287,20 +294,22 @@ function Cell({ item, index, board }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: 'yellow',
     alignItems: 'center',
     justifyContent: 'center',
   },
   containerGame:{
-    backgroundColor: '#fff',
+    backgroundColor: 'yellow',
+    flexDirection: "column",
     alignItems: 'center',
-    justifyContent: 'center',
-    height: "100%"
+    justifyContent: 'flex-start',
+    flex: 1
   },
   boardContainer: {
     backgroundColor: 'brown',
     width: "100%",
-    margin: 5,
+    marginTop:2,
+    marginBottom:2,
     height: "56%",
     flexDirection: "column",
     alignItems: "center",
@@ -310,7 +319,7 @@ const styles = StyleSheet.create({
     width: 130,
     height: 130,
     marginTop: 5,
-    marginLeft: 5,
+    marginHorizontal:2,
     backgroundColor: 'grey',
     alignItems:"center"
   },
