@@ -28,7 +28,7 @@ import {
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 
-import moment from 'moment'
+import moment from 'moment';
 
 
 const Stack = createStackNavigator();
@@ -41,7 +41,6 @@ function App() {
           <Stack.Navigator>
             <Stack.Screen name="Home" component={HomeScreen} options={{ headerShown: false }}/>
             <Stack.Screen name="SUDOKU" component={Board}/>
-            <Stack.Screen name="Finish" component={FinishScreen} options={{ headerShown: false }}/>
             <Stack.Screen name="Win" component={WinScreen} options={{ headerShown: false }}/>
           </Stack.Navigator>
         </NavigationContainer>
@@ -102,28 +101,23 @@ function HomeScreen ({ navigation }) {
   )
 }
 
-function FinishScreen ({ navigation }) {
-  return(
-    <View style={styles.container}>
-      <View style={styles.homeScreen}>
-        <Text style={styles.textTitle}>Congratulations!</Text>
-        <Text style={styles.captTitle}>"It is NOT for you, we congratulate the BOT! :P"</Text>
-        <Button style={styles.playAgain} title="PLAY AGAIN" 
-          onPress={() => navigation.push('SUDOKU')}
-        />
-      </View>
-    </View>
-  )
-}
 
 function WinScreen ({ navigation }) {
+
+  const dispatch = useDispatch()
+
+  const onPlayAgain = () => {
+    navigation.push('SUDOKU')
+    dispatch(setLoading(true))
+  }
+
   return(
     <View style={styles.container}>
       <View style={styles.homeScreen}>
         <Text style={styles.textTitle}>Congratulations!</Text>
         <Text style={styles.captTitle}>"You are the real genius!"</Text>
         <Button style={styles.playAgain} title="PLAY AGAIN" 
-          onPress={() => navigation.push('SUDOKU')}
+          onPress={() => onPlayAgain()}
         />
       </View>
     </View>
@@ -205,6 +199,7 @@ function Board ({ navigation }) {
         },
         {
           text: "Yes Please", onPress: () => {
+            console.log(board)
             dispatch(showResult(board))
           }
         }
@@ -217,7 +212,7 @@ function Board ({ navigation }) {
   return (
     <View style={styles.containerGame}>
       <ActivityIndicator animating={isLoading} size="large" color="#0000ff" style={styles.loadingStyle} />
-      <Text style={styles.playerName}>{`${initTimer.hours} : ${initTimer.mins} : ${initTimer.secs}`}</Text>
+      <Text style={styles.timerStyle}>{`${initTimer.hours} : ${initTimer.mins} : ${initTimer.secs}`}</Text>
     <View style={styles.topBoardBar}>
       <Text style={styles.playerName}>{playerName}</Text>
     </View>
@@ -270,7 +265,7 @@ function Cell({ item, index, board }) {
         data = {item}
         renderItem = {({ item, index }) => (
           <TextInput
-          editable={item == 0 ? true: false} 
+          // editable={item == 0 ? true: false} 
           style={item == 0 ? styles.inputStyle: styles.clueStyle}
           keyboardType={'numeric'}
           maxLength={1}
@@ -341,10 +336,6 @@ const styles = StyleSheet.create({
     marginLeft: 2.5,
     marginRight:2.5
   },
-  lottie: {
-    width: 100,
-    height: 100
-  },
   textTitle:{
     fontSize: 30
   },
@@ -384,16 +375,26 @@ const styles = StyleSheet.create({
   playerName: {
     fontSize: 20,
     textTransform: "uppercase",
-    fontWeight: 'bold'
+    fontWeight: 'bold',
+    paddingHorizontal: 5,
+    backgroundColor: '#0abbff'
+
   },
   topBoardBar: {
     width: '100%',
+    alignItems:"center",
+    justifyContent: "center"
   },
   botBoardBar: {
     textTransform: "uppercase",
     fontWeight: 'bold',
     textAlign: 'center',
     flexDirection: 'row'
+  },
+  timerStyle: {
+    fontSize: 40,
+    fontWeight: 'bold',
+    textDecorationLine: "underline"
   }
 });
 

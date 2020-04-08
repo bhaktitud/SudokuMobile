@@ -42,7 +42,6 @@ export const validateResult = (board) => {
         axios
             .post(`https://sugoku.herokuapp.com/validate`, board)
             .then(({ data }) => {
-                console.log(data, 'validation')
                 const { status } = data
                 dispatch(setValidateStatus(status))
             }).catch((err) => {
