@@ -11,7 +11,9 @@ import {
   Picker,
   ActivityIndicator,
   KeyboardAvoidingView,
-  KeyboardAvoidingViewComponent
+  KeyboardAvoidingViewComponent,
+  Keyboard,
+  Platform
 } from 'react-native';
 import { Provider } from 'react-redux';
 import store from './src/store';
@@ -31,6 +33,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 
 import moment from 'moment';
+import { TouchableWithoutFeedback } from 'react-native-gesture-handler';
 
 
 const Stack = createStackNavigator();
@@ -209,41 +212,38 @@ function Board ({ navigation }) {
     );
   }
 
-
-
   return (
-    <KeyboardAvoidingView style={styles.containerGame}>
+
       <View style={styles.containerGame}>
-          <ActivityIndicator animating={isLoading} size="large" color="#0000ff" style={styles.loadingStyle} />
-          <Text style={styles.timerStyle}>{`${initTimer.hours} : ${initTimer.mins} : ${initTimer.secs}`}</Text>
-        <View style={styles.topBoardBar}>
-          <Text style={styles.playerName}>{playerName}</Text>
-        </View>
-        <View style={styles.boardContainer}>
-            <FlatList 
-              style={styles.cellList}
-              data={board}
-              renderItem={({ item, index }) => (
-                <Cell style={styles.viewStyle} item={item} index={index} board={board}/>
-              )}
-              numColumns={3}
-              listKey={(item, index) => index.toString()}
-              keyExtractor={(item, index) => index.toString()}
-            />
-        </View>
-        <View style={styles.buttonGameContainer}>
-            <Button style={styles.buttonOnGame} title="Validate" 
-                onPress={handleOnValidate}
-            />
-            <Button style={styles.buttonOnGame} title="Show me the way!"
-              onPress={handleOnShowFinal}
-            />
-        </View>
-        <View style={styles.statusBar}>
-            <Text style={styles.botBoardBar}>Game Status : {gameStatus} | Difficulty : {level}</Text>
-        </View>
+        <ActivityIndicator animating={isLoading} size="large" color="#0000ff" style={styles.loadingStyle} />
+        <Text style={styles.timerStyle}>{`${initTimer.hours} : ${initTimer.mins} : ${initTimer.secs}`}</Text>
+      <View style={styles.topBoardBar}>
+        <Text style={styles.playerName}>{playerName}</Text>
       </View>
-    </KeyboardAvoidingView>
+      <View style={styles.boardContainer}>
+          <FlatList 
+            style={styles.cellList}
+            data={board}
+            renderItem={({ item, index }) => (
+              <Cell style={styles.viewStyle} item={item} index={index} board={board}/>
+            )}
+            numColumns={3}
+            listKey={(item, index) => index.toString()}
+            keyExtractor={(item, index) => index.toString()}
+          />
+      </View>
+      <View style={styles.buttonGameContainer}>
+          <Button style={styles.buttonOnGame} title="Validate" 
+              onPress={handleOnValidate}
+          />
+          <Button style={styles.buttonOnGame} title="Show me the way!"
+            onPress={handleOnShowFinal}
+          />
+      </View>
+      <View style={styles.statusBar}>
+          <Text style={styles.botBoardBar}>Game Status : {gameStatus} | Difficulty : {level}</Text>
+      </View>
+    </View>
   )
 }
 
@@ -264,7 +264,6 @@ function Cell({ item, index, board }) {
   }
 
   return (
-    <KeyboardAvoidingView>
       <View style={styles.viewStyle} >
         
           <FlatList 
@@ -286,7 +285,6 @@ function Cell({ item, index, board }) {
             keyExtractor={(item, index) => index.toString()}
           />
       </View>
-    </KeyboardAvoidingView>
   )
 }
 
@@ -299,6 +297,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   containerGame:{
+    backgroundColor: 'yellow',
+    flexDirection: "column",
+    alignItems: 'center',
+    justifyContent: 'flex-start',
+    flex: 1
+  },
+  keyboardContainerGame: {
     backgroundColor: 'yellow',
     flexDirection: "column",
     alignItems: 'center',
