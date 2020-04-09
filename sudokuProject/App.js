@@ -13,7 +13,8 @@ import {
   KeyboardAvoidingView,
   KeyboardAvoidingViewComponent,
   Keyboard,
-  Platform
+  Platform,
+  SafeAreaView
 } from 'react-native';
 import { Provider } from 'react-redux';
 import store from './src/store';
@@ -33,7 +34,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 
 import moment from 'moment';
-import { TouchableWithoutFeedback } from 'react-native-gesture-handler';
+import { TouchableWithoutFeedback, ScrollView } from 'react-native-gesture-handler';
 
 
 const Stack = createStackNavigator();
@@ -214,36 +215,34 @@ function Board ({ navigation }) {
 
   return (
 
-      <View style={styles.containerGame}>
-        <ActivityIndicator animating={isLoading} size="large" color="#0000ff" style={styles.loadingStyle} />
-        <Text style={styles.timerStyle}>{`${initTimer.hours} : ${initTimer.mins} : ${initTimer.secs}`}</Text>
-      <View style={styles.topBoardBar}>
-        <Text style={styles.playerName}>{playerName}</Text>
-      </View>
-      <View style={styles.boardContainer}>
-          <FlatList 
-            style={styles.cellList}
-            data={board}
-            renderItem={({ item, index }) => (
-              <Cell style={styles.viewStyle} item={item} index={index} board={board}/>
-            )}
-            numColumns={3}
-            listKey={(item, index) => index.toString()}
-            keyExtractor={(item, index) => index.toString()}
-          />
-      </View>
-      <View style={styles.statusBar}>
-          <Text style={styles.botBoardBar}>Game Status : {gameStatus} | Difficulty : {level}</Text>
-      </View>
-      <View style={styles.buttonGameContainer}>
-          <Button style={styles.buttonOnGame} title="Validate" 
-              onPress={handleOnValidate}
-          />
-          <Button style={styles.buttonOnGame} title="Show me the way!"
-            onPress={handleOnShowFinal}
-          />
-      </View>
-    </View>
+    <KeyboardAvoidingView behavior='height' style={styles.container}>
+      <ScrollView contentContainerStyle={{justifyContent: 'center', alignItems: 'center'}}>
+          <ActivityIndicator animating={isLoading} size="large" color="#0000ff" style={styles.loadingStyle} />
+          <Text style={styles.timerStyle}>{`${initTimer.hours} : ${initTimer.mins} : ${initTimer.secs}`}</Text>
+        <View style={styles.topBoardBar}>
+          <Text style={styles.playerName}>{playerName}</Text>
+        </View>
+          <View style={styles.boardContainer}>
+              {
+                board.map((item, index) => (
+                  <Cell style={styles.viewStyle} item={item} index={index} board={board} key={index}/>
+                ))
+              }
+          </View>
+      
+          <View style={styles.statusBar}>
+            <Text style={styles.botBoardBar}>Game Status : {gameStatus} | Difficulty : {level}</Text>
+          </View>
+          <View style={styles.buttonGameContainer}>
+              <Button style={styles.buttonOnGame} title="Validate" 
+                  onPress={handleOnValidate}
+              />
+              <Button style={styles.buttonOnGame} title="Show me the way!"
+                onPress={handleOnShowFinal}
+              />
+          </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   )
 }
 
@@ -264,59 +263,41 @@ function Cell({ item, index, board }) {
   }
 
   return (
-      <View style={styles.viewStyle} >
-        
-          <FlatList 
-            data = {item}
-            renderItem = {({ item, index }) => (
-              <TextInput
-              // editable={item == 0 ? true: false} 
-              style={item == 0 ? styles.inputStyle: styles.clueStyle}
-              keyboardType={'numeric'}
-              maxLength={1}
-              defaultValue={item.toString()}
-              underlineColorAndroid="transparent"
-              onChangeText={text => onChangeValue(text, index, rowIndex)}
-              key={index.toString()+rowIndex}
-              />
-            )}
-            numColumns={3}
-            listKey={(item, index) => index.toString()}
-            keyExtractor={(item, index) => index.toString()}
-          />
-      </View>
+    <View style={styles.viewStyle}>
+      {
+        item.map((cellItem, index) => (
+          <TextInput
+            // editable={item == 0 ? true: false} 
+            style={cellItem == 0 ? styles.inputStyle: styles.clueStyle}
+            keyboardType={'numeric'}
+            maxLength={1}
+            defaultValue={cellItem.toString()}
+            underlineColorAndroid="transparent"
+            onChangeText={text => onChangeValue(text, index, rowIndex)}
+            key={index.toString()+rowIndex}
+            />
+        ))
+      }
+    </View>
   )
 }
 
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
     backgroundColor: 'yellow',
+    flexDirection: "column",
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  containerGame:{
-    backgroundColor: 'yellow',
-    flexDirection: "column",
-    alignItems: 'center',
-    justifyContent: 'flex-start',
-    flex: 1
-  },
-  keyboardContainerGame: {
-    backgroundColor: 'yellow',
-    flexDirection: "column",
-    alignItems: 'center',
-    justifyContent: 'flex-start',
-    flex: 1
+    flex:1
   },
   boardContainer: {
     backgroundColor: 'brown',
     width: "100%",
     marginTop:2,
     marginBottom:2,
-    height: "56%",
-    flexDirection: "column",
+    flexDirection: "row",
+    flexWrap:"wrap",
     alignItems: "center",
     justifyContent: "center"
   },
@@ -326,7 +307,9 @@ const styles = StyleSheet.create({
     marginTop: 5,
     marginHorizontal:2,
     backgroundColor: 'grey',
-    alignItems:"center"
+    alignItems:"center",
+    flexDirection: "row",
+    flexWrap: 'wrap'
   },
   inputStyle: {
     textAlign: "center",
@@ -360,7 +343,6 @@ const styles = StyleSheet.create({
     width: "60%"
   },
   statusBar: {
-    marginBottom: 10,
     backgroundColor: '#0abbff',
     width: '100%'
   },
